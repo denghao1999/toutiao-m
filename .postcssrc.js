@@ -10,13 +10,14 @@ module.exports = {
     //   },
     // 配置使用postcss-pxtorem 插件
     "postcss-pxtorem": {
-      rootValue({ file }) {
+      rootValue ({ file }) {
         return file.indexOf("vant") !== -1 ? 37.5 : 75;
       },
 
       //配置要转换的 css属性
       // *表示所有
       propList: ["*"],
+      exclude: 'github-markdown'
     },
   },
 };

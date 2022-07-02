@@ -10,6 +10,7 @@ request.interceptors.request.use(
     // 请求发起会经过这里
     // config：本次请求的请求配置对象
     const user = store.state.user;
+    console.log(user);
     if (user) {
       config.headers.Authorization = `Bearer ${user.token}`;
     }

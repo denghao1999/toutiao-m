@@ -1,5 +1,5 @@
 <template>
-  <div class="login-container">
+  <div class="login-container" >
     <!-- 导航栏 -->
     <van-nav-bar title="登录" class="page-nav-bar">
       <van-icon slot="left" name="cross" @click="$router.back()" />
@@ -64,7 +64,7 @@ export default {
   data() {
     return {
       user: {
-        mobile: "13911111111",
+        mobile: "",
         code: "",
       },
       UserFromRules: {
@@ -105,6 +105,7 @@ export default {
       try {
         // 成功
         const { data } = await login(user);
+        console.log(data);
         this.$store.commit("setUser", data.data);
         this.$toast.success("登陆成功");
         //登陆成功调回原来的页面
@@ -119,7 +120,7 @@ export default {
       }
     },
     async onSendSms() {
-      console.log("safas");
+      // console.log("safas");
       // 1. 验证手机号
       try {
         await this.$refs.loginForm.validate("mobile");
@@ -130,7 +131,7 @@ export default {
       this.isCountDown = true;
       //       // 3. 请求与发送验证码
       try {
-        console.log(1);
+        // console.log(1);
         await sendSms(this.user.mobile);
         this.$toast("发送成功");
       } catch (err) {

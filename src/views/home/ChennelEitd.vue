@@ -97,7 +97,7 @@ export default {
       try {
         const { data } = await getAllChannels()
         this.allChannels = data.data.channels
-        // console.log(this.allChannels);
+        console.log(this.allChannels);
       } catch (err) {
         this.$toast('获取数据失败')
         console.log(err);
@@ -118,6 +118,7 @@ export default {
           this.$toast('保存失败', err)
         }
       } else {
+        console.log(111);
         //未登录， 把数据放到本地存储
         setItem('TOUTIAO_CHANNELS', this.MyChannls)
       }
@@ -135,7 +136,7 @@ export default {
         if (index <= this.active) {
           this.$emit('Updata-channel', this.active - 1, true)
         }
-        // 处理持久化 
+        // 处理持久化
         this.deleteUserChannel(channel)
       } else {
         // 完成状态跳转页面

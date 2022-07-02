@@ -32,7 +32,7 @@
     </div>
 
     <div class="header not-login" v-else>
-      <div class="login-btn" @click="$router.push('/login')">
+      <div class="login-btn" @click="$router.push('login')">
         <img class="mobile" src="~@/assets/mobile.png" alt="" />
         <span class="text">登录 / 注册</span>
       </div>
@@ -53,12 +53,19 @@
     <van-cell is-link title="消息通知" />
     <van-cell class="mb-9" is-link title="小旭同学" />
     <van-cell
+     is-link
       v-if="user"
       class="logout-cell"
       title="退出登录"
       clickable
       @click="outLogin"
     />
+    <van-grid clickable>
+  <van-grid-item  icon="photo-o" text="文字" />
+  <van-grid-item icon="photo-o" text="文字" />
+  <van-grid-item icon="photo-o" text="文字" />
+  <van-grid-item icon="photo-o" text="文字" />
+</van-grid>
   </div>
 </template>
 
@@ -87,7 +94,7 @@ export default {
     outLogin() {
       this.$dialog
         .confirm({
-          title: "确定要退出登录吗",
+          title: "确定要退出登录吗", 
         })
         .then(() => {
           // 确认退出：清除登陆状态（容器中的user+ 本地存储中的user）
@@ -97,7 +104,7 @@ export default {
     },
     async loadUserInfo() {
       try {
-        const res = await getUserInfo();
+        const res = await getUserInfo(); //  
         console.log(res);
         this.UserInfo = res.data.data;
       } catch (err) {

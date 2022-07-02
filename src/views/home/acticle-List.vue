@@ -1,6 +1,7 @@
 <template>
   <div class="article-list">
     <van-pull-refresh
+      ref="pullrefresh"
       v-model="isLoading"
       :success-text="successText"
       @refresh="onRefresh"
@@ -28,6 +29,8 @@
 </template>
 
 <script>
+let ele = null
+let scrolltop = 0
 import { getActicle } from "@/api/acticle";
 import ArticleItem from "@/components/article-item";
 export default {
@@ -120,6 +123,18 @@ export default {
       }
     },
   },
+  // 操做Dom
+  mounted(){
+    // 组件最终渲染成html dom ，$el 就是渲染好的跟标签
+    ele = this.$refs.pullrefresh.$el
+    this.$refs.pullrefresh.$el.addEventListener('scroll',function(){
+      console.log(this.scrollTop);
+      scrolltop = this.scrollTop
+    })
+  },
+  activated(){
+    ele.scrollTop = scrolltop
+  }
 };
 </script>
 

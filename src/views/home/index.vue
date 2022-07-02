@@ -9,7 +9,7 @@
         type="info"
         size="small"
         round
-       
+       to="/search"
       >
         搜索
       </van-button>
@@ -40,6 +40,7 @@
       position="bottom"
       :style="{ height: '100%' }"
     >
+   <!-- 频道编辑组件模块 -->
       <ChennelEitd 
       :MyChannls="Channls" 
       :active="active" 
@@ -54,6 +55,8 @@
 import acticleList from "./acticle-List.vue";
 import { getUserChannls } from "@/api/user";
 import ChennelEitd from "@/views/home/ChennelEitd.vue";
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage';
 export default {
   name: "HomeIndex",
   data() {
@@ -66,12 +69,30 @@ export default {
   created() {
     this.getChannls();
   },
+  computed:{
+  ...mapState(['user']),
+  },
   methods: {
     async getChannls() {
       try {
-        const res = await getUserChannls();
-        // console.log(res);
-        this.Channls = res.data.data.channels;
+        let channels =[]
+        if(this.user){
+          // 已登录，请求获取用户频道列表
+          const res = await getUserChannls();
+          channels = res.data.data.channels;
+        }else{
+        // 未登录，判断是否有本地的频道列表数据
+        const getChannls = getItem('TOUTIAO_CHANNELS')
+         // 有 拿来使用
+         if(getChannls){
+          channels = getChannls
+         }else{
+          // 没有 ，请求获取默认频道列表
+           const res = await getUserChannls();
+          this.channels = res.data.data.channels;
+         }
+        }
+          this.Channls = channels
       } catch (err) {
         console.log(err);
       }
@@ -87,6 +108,22 @@ export default {
     acticleList,
     ChennelEitd,
   },
+  // watch:{
+  //   Channls:{
+  //      handler(newVal){
+  //     if(this.$store.state.user && this.$store.user.tpken){
+  //       console.log(123);
+  //       const arr = []
+  //       newVal.forEach((item,index) => {
+  //         arr.push({id:item.id,seq:index})
+  //       });
+  //       console.log(arr);
+  //     }
+  //   },
+  //   deep:true
+  //   },
+   
+  // }
 };
 </script>
 

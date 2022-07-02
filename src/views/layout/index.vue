@@ -1,15 +1,16 @@
 <template>
   <div class="layout-container">
     <!-- 子路由出口 -->
-    <router-view></router-view>
+    <keep-alive :include="['HomeIndex']">
+      <router-view />
+    </keep-alive>
     <!-- 子路由出口 -->
 
     <!-- 标签导航栏 
-    
     router:开启路由模式
     -->
-    <van-tabbar class="layout-tabbar" v-model="active" router>
-      <van-tabbar-item to="/">
+    <van-tabbar class="layout-tabbar" route >
+      <van-tabbar-item to="/home" >
         <i slot="icon" class="toutiao toutiao-shouye"></i>
         <span class="text"> 首页</span></van-tabbar-item
       >
@@ -37,7 +38,7 @@ export default {
   name: "LayoutIndex",
   data() {
     return {
-      active: 0,
+
     };
   },
 };

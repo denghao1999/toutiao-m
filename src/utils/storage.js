@@ -20,7 +20,13 @@ export const getItem = (key) => {
   }
 };
 
-// 删除数据
+// 删除数据,删除一个
 export const removeItem = (key) => {
   window.localStorage.removeItem(key);
 };
+
+
+// 删除所有的本地存储数据
+export const clearItem = ()=>{
+  window.localStorage.clearItem()
+}

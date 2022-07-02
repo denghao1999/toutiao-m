@@ -6,7 +6,7 @@ Vue.use(Vuex);
 const TOKEN_KEY = "TOUTIAO_USER";
 export default new Vuex.Store({
   state: {
-    // 一个对象存储当前登陆用户信息 （token等数据）
+    // 一个对象存储当前登陆用户信息 （token等数据） 
     user: getItem(TOKEN_KEY),
   },
   getters: {},
