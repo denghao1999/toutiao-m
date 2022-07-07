@@ -16,6 +16,9 @@ import "./utils/dayjs";
 Vue.config.productionTip = false;
 
 Vue.use(Vant);
+
+import UserFollow from '@/components/userfollow'
+Vue.component(UserFollow.name,UserFollow)
 new Vue({
   router,
   store,

@@ -12,6 +12,8 @@ module.exports = {
     "postcss-pxtorem": {
       rootValue ({ file }) {
         return file.indexOf("vant") !== -1 ? 37.5 : 75;
+        
+        // return (file.indexOf("vant") !== -1 || file.indexOf('github-markdown-css') !== -1) ? 37.5 : 75;
       },
 
       //配置要转换的 css属性

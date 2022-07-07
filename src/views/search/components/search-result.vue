@@ -81,9 +81,8 @@ export default {
     },
     // 下拉刷新 
     onRefresh () { 
-      this.Page = 1 
       this.list = [],
-      this.getResult
+      this.onLoad()
     }
   },
 }

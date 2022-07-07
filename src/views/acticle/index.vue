@@ -1,7 +1,11 @@
 <template>
   <div class="article-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar" left-arrow title="黑马头条"></van-nav-bar>
+    <van-nav-bar class="page-nav-bar" title="黑马头条">
+      <template #left>
+        <van-icon name="arrow-left" @click="$router.back()" />
+      </template>
+    </van-nav-bar>
     <!-- /导航栏 -->
 
     <div class="main-wrap">
@@ -30,7 +34,29 @@
           <div slot="label" class="publish-date">
             {{ article.pubdate | relativeTime }}
           </div>
+
+          <!-- 用户关注组件 -->
+          <!--  @updataIsfollow="article.is_followed = $event" -->
+          <!--  -->
+          <userFollow
+            v-model="article.is_followed"
+            class="follow-btn"
+            :userId="article.aut_id"
+          />
+          <!-- <van-button
+          :loading = 'followLoading'
+            v-if="article.is_followed"
+            class="follow-btn"
+            round
+            size="small"
+            @click="onFollow"
+            >已关注</van-button
+          >
+
           <van-button
+          :loading ='followLoading'
+            @click="onFollow"
+            v-else
             class="follow-btn"
             type="info"
             color="#3296fa"
@@ -38,18 +64,77 @@
             size="small"
             icon="plus"
             >关注</van-button
-          >
-          <!-- <van-button
-            class="follow-btn"
-            round
-            size="small"
-          >已关注</van-button> -->
+          > -->
         </van-cell>
         <!-- /用户信息 -->
 
         <!-- 文章内容 -->
-        <div class="article-content markdown-body" v-html="article.content"  ></div>
+        <div
+          class="article-content markdown-body"
+          v-html="article.content"
+          ref="article-content"
+        ></div>
         <van-divider>正文结束</van-divider>
+
+        <!-- 评论区 -->
+        <CommentList
+          :list="Commentlist"
+          :source="article.art_id"
+          @updata-susses="tatol = $event.total_count"
+          @raplyClick="onReplyClick"
+        />
+        <!-- 底部区域 -->
+        <div class="article-bottom" v-if="article.art_id">
+          <van-button
+            class="comment-btn"
+            type="default"
+            round
+            size="small"
+            @click="commentShow = true"
+            >写评论</van-button
+          >
+          <van-icon
+            class="comment-icon"
+            name="comment-o"
+            :badge="tatol"
+            color="#777"
+          />
+
+          <!-- 收藏 -->
+          <CollectArticle
+            name="star-o"
+            color="#777"
+            :is_collected.sync="article.is_collected"
+            :collectId="article.art_id"
+          />
+          <!-- <van-icon color="#777" name="star-o" /> -->
+
+          <!-- 点赞 -->
+          <LikingArticle
+            color="#777"
+            name="good-job-o"
+            v-model="article.attitude"
+            :likedId="article.art_id"
+          />
+          <!-- <van-icon color="#777" name="good-job-o" /> -->
+          <van-icon name="share" color="#777777" @click="showShare = true">
+            <van-share-sheet
+              v-model="showShare"
+              title="立即分享给好友"
+              :options="options"
+              close-on-click-overlay
+            />
+          </van-icon>
+        </div>
+        <!-- /底部区域 -->
+
+        <!-- 评论弹出 -->
+        <van-popup v-model="commentShow" position="bottom">
+          <CommentPost 
+          v-if="commentShow"
+          :target="article.art_id" @seccsePost="onSeccsePost" />
+        </van-popup>
+        <!-- 评论弹出 -->
       </div>
       <!-- /加载完成-文章详情 -->
 
@@ -69,37 +154,67 @@
       <!-- /加载失败：其它未知错误（例如网络原因或服务端异常） -->
     </div>
 
-    <!-- 底部区域 -->
-    <div class="article-bottom">
-      <van-button class="comment-btn" type="default" round size="small"
-        >写评论</van-button
-      >
-      <van-icon name="comment-o" info="123" color="#777" />
-      <van-icon color="#777" name="star-o" />
-      <van-icon color="#777" name="good-job-o" />
-      <van-icon name="share" color="#777777"></van-icon>
-    </div>
-    <!-- /底部区域 -->
+    <!-- 回复评论弹出层 -->
+    <van-popup v-model="isReplyShow" position="bottom" style="height: 100%">
+      <CommentReply
+        v-if="isReplyShow"
+        :comment="currentComment"
+        @close="isReplyShow = false"
+      />
+    </van-popup>
   </div>
 </template>
 
 <script>
 
 import { getActicleById } from '@/api/acticle'
+import { ImagePreview } from 'vant'
+import userFollow from '@/components/userfollow'
+import CollectArticle from '@/components/collect'
+import LikingArticle from '@/components/liking'
+import CommentList from './comment/commentList.vue'
+import CommentPost from './comment/commentPost.vue'
+import CommentReply from './comment/commentReply.vue'
+import 'github-markdown-css'
 export default {
   name: 'ArticleIndex',
-  components: {},
+  components: {
+    userFollow,
+    CollectArticle,
+    LikingArticle,
+    CommentList,
+    CommentPost,
+    CommentReply
+  },
   props: {
     articleId: {
       type: [Number, String],
       required: true
     }
   },
+  provide: function () {
+    return {
+      articleId: this.articleId
+    }
+  },
   data () {
     return {
       article: {},// 文章详情数据
       Loading: true,
-      errStatus: 0 // 
+      errStatus: 0,
+      tatol: null, //  评论数量 
+      commentShow: false, // 控制发布评论弹层显示状态
+      Commentlist: [],// 评论列表
+      isReplyShow: false,
+      currentComment: {},
+      showShare: false,
+      options: [
+        { name: '微信', icon: 'wechat' },
+        { name: '微博', icon: 'weibo' },
+        { name: '复制链接', icon: 'link' },
+        { name: '分享海报', icon: 'poster' },
+        { name: '二维码', icon: 'qrcode' },
+      ],
     }
   },
   computed: {},
@@ -113,7 +228,7 @@ export default {
     async LoadActicle () {
       this.Loading = true
       try {
-        console.log(this.articleId);
+        // console.log(this.articleId);
         const { data } = await getActicleById(this.articleId)
 
         // if (Math.random() > 0.5) {
@@ -121,8 +236,15 @@ export default {
         // }
         this.article = data.data
         console.log(data);
+
+        // // 初始化点击图片预览
+        // setTimeout(() => {
+        //   this.previewImage()
+        // }, 0);
       } catch (err) {
         // 判断是否有 错误状态码 有的话赋值给变量 随后进行v-else-if 
+        // 可选链 err.response?.status 也可以这样写
+        // 下面这种方法更安全
         if (err.response && err.response.status === 404) {
           this.errStatus = 404
 
@@ -131,14 +253,58 @@ export default {
       }
       // 不管请求失败还是成功 都要关闭加载状态
       this.Loading = false
+      // 在这一块的时候loading关闭了，页面就显示正文，但是必须还要写在 nextTick
+      // 因为数据更新 试图不能立即更新 写在nextTick回调中可以 因为nextTick 回调就是在试图更新完成 才会触发
+      this.$nextTick(() => {
+
+        this.previewImage()
+      })
+    },
+    previewImage () {
+      // 得到所有的img节点
+      const articleContent = this.$refs['article-content']
+      const imgs = articleContent.querySelectorAll('img')
+      if (imgs.length === 0) return
+      //  获取所有的 img 地址 
+      const images = []
+      imgs.forEach((img, index) => {
+        images.push(img.src)
+        console.log(img.src);
+        // 给每个 img 注册点击事件  在处理函数中调用预览
+        img.onclick = () => {
+          ImagePreview({
+            // 预览的图片地址数组
+            images,
+            // 起始位置 ， 从0开始
+            startPosition: index
+          })
+        }
+      })
+    },
+    onSeccsePost (data) {
+      // 点发布关闭弹层
+      this.commentShow = false
+      // 将数据添加到评论列表的最前面
+      this.Commentlist.unshift(data.new_obj)
+    },
+    onReplyClick (comment) {
+      // 当前点击回复评论的 对象
+      this.currentComment = comment
+
+      // 显示评论回复弹出层
+      this.isReplyShow = true
+      // this.commentShow = false
     }
   }
 }
 </script>
 
 <style scoped lang="less">
-@import './github-markdown';
+@import "./github-markdown";
 .article-container {
+  /deep/.van-icon-arrow-left {
+    color: #fff !important;
+  }
   .main-wrap {
     position: fixed;
     left: 0;
@@ -242,7 +408,7 @@ export default {
       line-height: 46px;
       color: #a7a7a7;
     }
-    .van-icon {
+    /deep/.van-icon {
       font-size: 40px;
       .van-info {
         font-size: 16px;
